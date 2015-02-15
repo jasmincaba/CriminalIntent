@@ -16,6 +16,8 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 
+import junit.framework.Assert;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
@@ -25,8 +27,8 @@ import java.util.UUID;
  */
 public class CrimeFragment extends Fragment{
     public static final String EXTRA_CRIME_ID = "extra_crime_id";
-    private static final String DIALOG_DATE = "date";
-    private static final int REQUEST_DATE = 0;
+    private static final String DIALOG_DATETIME = "date";
+    public static final int REQUEST_DATETIME = 0;
     private Crime mCrime;
     private EditText mTitleField;
     private Button mDateButton;
@@ -68,9 +70,9 @@ public class CrimeFragment extends Fragment{
             @Override
             public void onClick(View v) {
                 FragmentManager fm = getActivity().getSupportFragmentManager();
-                DatePickerFragment dialog = DatePickerFragment.newInstance(mCrime.getDate());
-                dialog.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
-                dialog.show(fm, DIALOG_DATE);
+                SelectTimeDialog dialog = SelectTimeDialog.newInstance(mCrime.getDate());
+                dialog.setTargetFragment(CrimeFragment.this, REQUEST_DATETIME);
+                dialog.show(fm, DIALOG_DATETIME);
             }
         });
         mSolvedCheckBox = (CheckBox)view.findViewById(R.id.crime_solved);
@@ -96,14 +98,21 @@ public class CrimeFragment extends Fragment{
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK) return;
-        if (requestCode == REQUEST_DATE) {
+        if (requestCode == REQUEST_DATETIME) {
             Date date = (Date)data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
-            mCrime.setDate(date);
+            Date time = (Date)data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
+            if (date != null) {
+                mCrime.setDate(date);
+            } else if (time != null) {
+                mCrime.setDate(time);
+            } else {
+                Assert.fail("Not supposed to happen");
+            }
             updateDate();
         }
     }
 
     private void updateDate() {
-        mDateButton.setText(new SimpleDateFormat("dd-MM-yyyy").format(mCrime.getDate()));
+        mDateButton.setText(new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(mCrime.getDate()));
     }
 }

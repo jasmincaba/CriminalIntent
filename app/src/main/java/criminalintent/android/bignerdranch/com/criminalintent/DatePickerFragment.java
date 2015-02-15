@@ -40,7 +40,7 @@ public class DatePickerFragment extends DialogFragment {
         datePicker.init(year, month, day, new DatePicker.OnDateChangedListener() {
             @Override
             public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                mDate = new GregorianCalendar(year, month, day).getTime();
+                mDate = new GregorianCalendar(year, monthOfYear, dayOfMonth).getTime();
                 getArguments().putSerializable(EXTRA_DATE, mDate);
             }
         });
