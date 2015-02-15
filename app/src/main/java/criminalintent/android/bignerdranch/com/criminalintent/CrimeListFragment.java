@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -21,16 +20,19 @@ import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * Created by samuel on 06/02/15.
  */
 public class CrimeListFragment extends ListFragment {
     private static final String TAG = "CrimeListFragment";
+    public static final String CRIME_ID_EXTRA = "crime_position";
     private ArrayList<Crime> mCrimes;
     private boolean mSubtitleVisible;
+    private static final int CRIME_REQUEST = 0x4555;
+    public static final int CRIME_DELETED_CRIME = 0x4556;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -40,7 +42,7 @@ public class CrimeListFragment extends ListFragment {
         mCrimes = CrimeLab.get(getActivity()).getCrimes();
         CrimeAdapter adapter = new CrimeAdapter(mCrimes);
         setListAdapter(adapter);
-       setRetainInstance(true);
+        setRetainInstance(true);
         mSubtitleVisible = false;
     }
 
@@ -49,7 +51,7 @@ public class CrimeListFragment extends ListFragment {
         Crime c = (Crime) ((CrimeAdapter)getListAdapter()).getItem(position);
         Intent i = new Intent(getActivity(), CrimePagerActivity.class);
         i.putExtra(CrimeFragment.EXTRA_CRIME_ID, c.getId());
-        startActivity(i);
+        startActivityForResult(i, CRIME_REQUEST);
     }
 
     @Override
@@ -152,7 +154,7 @@ public class CrimeListFragment extends ListFragment {
                 CrimeLab.get(getActivity()).addCrime(crime);
                 Intent i = new Intent(getActivity(), CrimePagerActivity.class);
                 i.putExtra(CrimeFragment.EXTRA_CRIME_ID, crime.getId());
-                startActivityForResult(i, 0);
+                startActivityForResult(i, CRIME_REQUEST);
                 return true;
             case R.id.menu_item_show_subtitle:
                 if (getActivity().getActionBar().getSubtitle() == null) {
@@ -200,5 +202,19 @@ public class CrimeListFragment extends ListFragment {
     public void onResume() {
         super.onResume();
         ((CrimeAdapter)getListAdapter()).notifyDataSetChanged();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == CRIME_DELETED_CRIME) {
+            UUID crime_uuid = (UUID) data.getSerializableExtra(CRIME_ID_EXTRA);
+            if (crime_uuid != null) {
+                CrimeLab crimeLab = CrimeLab.get(getActivity());
+                Crime crime = crimeLab.getCrime(crime_uuid);
+                crimeLab.deleteCrime(crime);
+                CrimeAdapter crimeAdapter = (CrimeAdapter)getListView().getAdapter();
+                crimeAdapter.notifyDataSetChanged();
+            }
+        }
     }
 }

@@ -12,6 +12,8 @@ import android.support.v4.app.NavUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,6 +54,13 @@ public class CrimeFragment extends Fragment{
                     NavUtils.navigateUpFromSameTask(getActivity());
                 }
                 return true;
+            case R.id.menu_item_delete_crime:
+                Intent intent = new Intent(getActivity(), CrimeListActivity.class);
+                intent.putExtra(CrimeListFragment.CRIME_ID_EXTRA, mCrime.getId());
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
+                getActivity().setResult(CrimeListFragment.CRIME_DELETED_CRIME, intent);
+                getActivity().finish();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -61,6 +70,12 @@ public class CrimeFragment extends Fragment{
     public void onPause() {
         super.onPause();
         CrimeLab.get(getActivity()).saveCrimes();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_crime, menu);
     }
 
     @TargetApi(11)

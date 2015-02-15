@@ -1,5 +1,6 @@
 package criminalintent.android.bignerdranch.com.criminalintent;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -65,5 +66,10 @@ public class CrimePagerActivity extends FragmentActivity {
 
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
     }
 }
