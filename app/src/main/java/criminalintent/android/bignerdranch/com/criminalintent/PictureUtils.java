@@ -48,6 +48,10 @@ public class PictureUtils {
 
         Bitmap bitmap = BitmapFactory.decodeFile(path, options);
 
+        if (bitmap == null) {
+            return null;
+        }
+
         if (matrix == null) {
             return new BitmapDrawable(a.getResources(), bitmap);
         } else {
