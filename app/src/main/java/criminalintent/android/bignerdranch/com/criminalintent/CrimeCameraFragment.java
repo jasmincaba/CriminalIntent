@@ -4,9 +4,11 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -18,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -48,8 +51,14 @@ public class CrimeCameraFragment extends Fragment {
             FileOutputStream os = null;
             boolean success = true;
 
+            File file = new File(Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_PICTURES), "criminal_intent");
+            if (!file.mkdirs()) {
+                Log.e(TAG, "Directory not created");
+            }
+
             try {
-                os = getActivity().openFileOutput(fileName, Context.MODE_PRIVATE);
+                os = new FileOutputStream(file.getAbsolutePath() + "/" + fileName);
                 os.write(data);
             } catch (Exception e) {
                 Log.e(TAG, "Error writing to file " + fileName, e);

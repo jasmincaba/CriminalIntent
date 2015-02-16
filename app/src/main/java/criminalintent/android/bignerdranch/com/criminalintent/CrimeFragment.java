@@ -4,9 +4,12 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.ExifInterface;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -25,6 +28,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
@@ -195,11 +200,41 @@ public class CrimeFragment extends Fragment{
         Photo p = mCrime.getPhoto();
         BitmapDrawable b = null;
         if (p != null) {
-            String path = getActivity().getFileStreamPath(p.getFilename()).getAbsolutePath();
-            b = PictureUtils.getScaledDrawable(getActivity(), path);
+//            String path = getActivity().getFileStreamPath(p.getFilename()).getAbsolutePath();
+            File file = new File(Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_PICTURES), "criminal_intent");
+            String path = file.getAbsolutePath() + "/" + mCrime.getPhoto().getFilename();
+
+            ExifInterface exif = null;     //Since API Level 5
+
+            try {
+                exif = new ExifInterface(path);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+            int rotationInDegrees = exifToDegrees(rotation);
+            try {
+                exif = new ExifInterface(path);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            String exifOrientation = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
+            Matrix matrix = new Matrix();
+            if (rotation != 0f) {matrix.preRotate(rotationInDegrees);}
+            b = PictureUtils.getScaledDrawable(getActivity(), path, matrix);
         }
 
         mPhotoView.setImageDrawable(b);
+    }
+
+    private int exifToDegrees(int exifOrientation) {
+        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) { return 90; }
+        else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {  return 180; }
+        else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {  return 270; }
+        return 0;
     }
 
     @Override

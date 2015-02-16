@@ -3,6 +3,7 @@ package criminalintent.android.bignerdranch.com.criminalintent;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.view.Display;
 import android.widget.ImageView;
@@ -11,12 +12,16 @@ import android.widget.ImageView;
  * Created by samuel on 15/02/15.
  */
 public class PictureUtils {
+    public static BitmapDrawable getScaledDrawable(Activity a, String path) {
+        return getScaledDrawable(a, path, null);
+    }
+
     /**
      * Get a BitmapDrawable from a local file that is scaled down
      * to fit the current Window size.
      */
     @SuppressWarnings("deprecation")
-    public static BitmapDrawable getScaledDrawable(Activity a, String path) {
+    public static BitmapDrawable getScaledDrawable(Activity a, String path, Matrix matrix) {
         Display display = a.getWindowManager().getDefaultDisplay();
         float destWidth = display.getWidth();
         float destHeight = display.getHeight();
@@ -42,7 +47,13 @@ public class PictureUtils {
         options.inSampleSize = inSampleSize;
 
         Bitmap bitmap = BitmapFactory.decodeFile(path, options);
-        return new BitmapDrawable(a.getResources(), bitmap);
+
+        if (matrix == null) {
+            return new BitmapDrawable(a.getResources(), bitmap);
+        } else {
+            return new BitmapDrawable(a.getResources(),
+                    Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true));
+        }
     }
 
     public static void cleanImageView(ImageView imageView) {
